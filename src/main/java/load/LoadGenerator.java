@@ -4,20 +4,19 @@ import net.Packet;
 import net.Queue;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by luc on 9/4/14.
  */
 public class LoadGenerator implements LoadGeneratorMBean {
-    private org.slf4j.Logger log= LoggerFactory.getLogger(LoadGenerator.class);
+    private final org.slf4j.Logger log= LoggerFactory.getLogger(LoadGenerator.class);
     private int packetSize=1000;
     private double rate=100000;
-    boolean runnable=false;
-    private int prio;
-    ScheduledExecutorService executor;
-    Queue<Packet> queue;
+    private boolean runnable=false;
+    private final int prio;
+    final ScheduledExecutorService executor;
+    private final Queue<Packet> queue;
     private int random;
 
     public LoadGenerator(ScheduledExecutorService executor,Queue<Packet> queue, int p) {

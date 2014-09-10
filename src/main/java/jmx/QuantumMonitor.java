@@ -1,21 +1,16 @@
 package jmx;
 
-import net.PrioBucketQueue;
-
 /**
  * Created by luc on 9/4/14.
  */
 public class QuantumMonitor implements QuantumMonitorMBean {
-    public long count;
-    public long prevTime;
-    public long prevCount;
-    public long rate;
-    private boolean fair;
-    private PrioBucketQueue queue;
+    private long count;
+    private long prevTime;
+    private long prevCount;
+    private long rate;
 
-    public QuantumMonitor(PrioBucketQueue queue){
+    public QuantumMonitor(){
         prevTime=System.currentTimeMillis();
-        this.queue=queue;
     }
 
     public void inc() {

@@ -14,6 +14,6 @@ public interface Queue<T> {
     public boolean Queue(T x);
     public T deQueue();
     public void reset();
-    public IntMetrics getDelay();
+    public DelayMetrics getDelay();
 
 }

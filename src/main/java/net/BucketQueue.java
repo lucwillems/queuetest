@@ -1,9 +1,5 @@
 package net;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,27 +7,26 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by luc on 9/2/14.
  */
 public class BucketQueue implements Queue<Packet> {
-    private Logger log= LoggerFactory.getLogger(BucketQueue.class);
     private int quatum;
-    private BucketEvents notifier;
+    private final BucketEvents notifier;
     private final int priority;
     private int allocated;
     private int borrowed;
     private int lended;
-    private Lock lock;
+    private final Lock lock;
     private Queue<Packet> queue;
     private long backlog;
     private long queued;
     private long dequeue;
     private long dropped;
     private long dequeuepkt;
-    private IntMetrics delay;
+    private final DelayMetrics delay;
 
     public BucketQueue(int priority, BucketEvents notifier) {
         this.priority = priority;
         this.notifier = notifier;
         this.lock = new ReentrantLock();
-        this.delay=new IntMetrics(30);
+        this.delay=new DelayMetrics(30,1000);
     }
 
     @Override
@@ -105,7 +100,7 @@ public class BucketQueue implements Queue<Packet> {
     }
 
     @Override
-    public IntMetrics getDelay() {
+    public DelayMetrics getDelay() {
         return delay;
     }
 
@@ -132,7 +127,7 @@ public class BucketQueue implements Queue<Packet> {
                 allocated = allocated + p.size;
                 dequeue += p.size;
                 backlog -= p.size;
-                delay.add((int) (System.currentTimeMillis()-p.timeStamp));
+                delay.add(p.delay());
             }
             return p;
         } finally {

@@ -5,11 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PrioQueuesTest {
-    private Logger logger= LoggerFactory.getLogger(PrioQueuesTest.class);
+    private final Logger logger= LoggerFactory.getLogger(PrioQueuesTest.class);
 
     @Test
     public void testPrioQueue1(){
-        int prios=7;
         PrioBucketQueue queue=new PrioBucketQueue(7,6);
         queue.init(new BucketEvents() {
             @Override

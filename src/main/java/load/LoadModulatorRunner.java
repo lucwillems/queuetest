@@ -9,10 +9,7 @@ public class LoadModulatorRunner implements Runnable {
 
     private final LoadModulatorMBean input;
     private final SinkerMBean sinker;
-    private double currentRate;
-    private double deltaRate;
-    private boolean up;
-    private org.slf4j.Logger log= LoggerFactory.getLogger(LoadModulatorRunner.class);
+    private final org.slf4j.Logger log= LoggerFactory.getLogger(LoadModulatorRunner.class);
 
     public LoadModulatorRunner(SinkerMBean sinker,LoadModulatorMBean input) {
         this.input=input;
@@ -21,22 +18,22 @@ public class LoadModulatorRunner implements Runnable {
     }
     @Override
     public void run() {
-        currentRate=sinker.getRate();
-        up=true;
+        double currentRate = sinker.getRate();
+        boolean up = true;
         while(input.isRunable()) {
-            if (currentRate>0) {
-                log.debug("current rate: {}",currentRate);
+            if (currentRate >0) {
+                log.debug("current rate: {}", currentRate);
                 sinker.setRate(currentRate);
             }
             try {
                 Thread.sleep(input.getTime());
             } catch (InterruptedException ignore) { return;}
             if (up) {
-                if (currentRate<input.getMaximum()) {
-                    currentRate+=input.getDelta();
+                if (currentRate <input.getMaximum()) {
+                    currentRate +=input.getDelta();
                 } else {
                     log.info("got maximum, waiting {} msec",input.getStayHighTime());
-                    up=false;
+                    up =false;
                     try {
                         Thread.sleep(input.getStayHighTime());
                     } catch (InterruptedException ignore) {return;}
@@ -47,7 +44,7 @@ public class LoadModulatorRunner implements Runnable {
                     currentRate -=input.getDelta();
                 } else {
                     log.info("got minimum, waiting {} msec",input.getStayLowTime());
-                    up=true;
+                    up =true;
                     try {
                         Thread.sleep(input.getStayLowTime());
                     } catch (InterruptedException ignore) {return;}

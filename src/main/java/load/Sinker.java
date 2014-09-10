@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * Created by luc on 9/4/14.
  */
 public class Sinker implements SinkerMBean {
-    private Logger log= LoggerFactory.getLogger(Sinker.class);
+    private final Logger log= LoggerFactory.getLogger(Sinker.class);
     private final ScheduledExecutorService executor;
     private final Queue<Packet> queue;
     private double rate=1000000;
@@ -38,21 +38,6 @@ public class Sinker implements SinkerMBean {
     public boolean isRunable() {
         return runable;
     }
-
-    @Override
-    public long getDelay() {
-        return avgDelay;
-    }
-
-    @Override
-    public void addDelay(long d) {
-        if (avgDelay==0) {
-            avgDelay=d;
-        } else {
-            avgDelay=(avgDelay+d)/2;
-        }
-    }
-
 
     @Override
     public void start() {

@@ -14,8 +14,8 @@ public class LoadModulator implements LoadModulatorMBean {
     private double maxRate=20000;
     private int time=2000;
     private boolean runable;
-    private ScheduledExecutorService executor;
-    private org.slf4j.Logger log = LoggerFactory.getLogger(LoadModulator.class);
+    private final ScheduledExecutorService executor;
+    private final org.slf4j.Logger log = LoggerFactory.getLogger(LoadModulator.class);
     private int samples=10;
     private long lowTime=8000;
     private long highTime=12000;

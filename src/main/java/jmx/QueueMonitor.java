@@ -74,4 +74,7 @@ public class QueueMonitor implements QueueMonitorMBean {
     public int getMaxDelay() {
         return queue.getDelay().getMax();
     }
+
+    @Override
+    public int getAvgDelay() { return queue.getDelay().getAvg();}
 }

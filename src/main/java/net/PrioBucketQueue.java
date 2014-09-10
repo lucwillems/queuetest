@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by luc on 9/2/14.
  */
 public class PrioBucketQueue implements Queue<Packet> {
-    private Logger log = LoggerFactory.getLogger(PrioBucketQueue.class);
+    private final Logger log = LoggerFactory.getLogger(PrioBucketQueue.class);
     private BucketQueue[] buckets;
     private int defaultPrio;
     private int pktCnt = 0;
@@ -21,9 +21,9 @@ public class PrioBucketQueue implements Queue<Packet> {
     private long queued;
     private long dequeue;
     private long dropped;
-    private DeltaQueue DinQ=new DeltaQueue();
-    private DeltaQueue DoutQ=new DeltaQueue();
-    private IntMetrics delay;
+    private final DeltaQueue DinQ=new DeltaQueue();
+    private final DeltaQueue DoutQ=new DeltaQueue();
+    private DelayMetrics delay;
 
     public PrioBucketQueue(int nrPrio, int defaultPrio) {
         assert defaultPrio < nrPrio && defaultPrio >= 0;
@@ -31,7 +31,7 @@ public class PrioBucketQueue implements Queue<Packet> {
         this.defaultPrio = defaultPrio;
         this.lock = new ReentrantLock(true);
         this.notEmpty = lock.newCondition();
-        this.delay=new IntMetrics(100);
+        this.delay=new DelayMetrics(200,1000);
     }
 
 
@@ -104,7 +104,6 @@ public class PrioBucketQueue implements Queue<Packet> {
         //todo : change this
         lock.lock();
         try {
-            boolean queueResult = false;
             if (p.prio <0 || p.prio >=buckets.length ) {
                 p.prio=defaultPrio;
             }
@@ -168,7 +167,7 @@ public class PrioBucketQueue implements Queue<Packet> {
                                 Packet p = buckets[i].deQueue();
                                 if (p !=null) {
                                     dequeue +=p.size;
-                                    delay.add((int) (System.currentTimeMillis() - p.timeStamp));
+                                    delay.add(p.delay());
                                     return p;
                                 }
                            } finally {
@@ -206,7 +205,7 @@ public class PrioBucketQueue implements Queue<Packet> {
                                         Packet p = buckets[i].borrow();
                                         if (p !=null) {
                                             dequeue +=p.size;
-                                            delay.add((int)(System.currentTimeMillis() - p.timeStamp));
+                                            delay.add(p.delay());
                                             //account for the borrowed bytes we have dequeued in bucket[i]
                                             buckets[b].borrowBytes(p.size);
                                             return p;
@@ -246,7 +245,7 @@ public class PrioBucketQueue implements Queue<Packet> {
     }
 
     @Override
-    public IntMetrics getDelay() {
+    public DelayMetrics getDelay() {
         return delay;
     }
 }

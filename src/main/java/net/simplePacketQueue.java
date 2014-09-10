@@ -8,24 +8,19 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by luc onv 9/3/14.
  */
 public class simplePacketQueue implements net.Queue<Packet> {
-    protected java.util.Queue<Packet> queue;
-    protected Lock lock;
-    private int maxPkt=Integer.MAX_VALUE;
+    private final java.util.Queue<Packet> queue;
+    private final Lock lock;
     private long backlog;
     private long queued;
     private long dequeue;
-    private long lastDelay;
-    private IntMetrics delay;
+    private final DelayMetrics delay;
 
     public simplePacketQueue() {
         queue=new LinkedList<Packet>();//todo replace this by codel
         lock=new ReentrantLock();
-        delay=new IntMetrics(100);
+        delay=new DelayMetrics(30,1000);
     }
 
-    public void setMaxPkt(int max) {
-        this.maxPkt=max;
-    }
     @Override
     public boolean isEmpty() {
         return queue.isEmpty();
@@ -80,9 +75,9 @@ public class simplePacketQueue implements net.Queue<Packet> {
         try {
             Packet p=queue.remove();
             if (p!=null) {
-                queued-=p.size;
+                dequeue+=p.size;
                 backlog-=p.size;
-                delay.add((int) (System.currentTimeMillis()-p.timeStamp));
+                delay.add(p.delay());
             }
             return p;
         } finally {
@@ -101,7 +96,7 @@ public class simplePacketQueue implements net.Queue<Packet> {
     }
 
     @Override
-    public IntMetrics getDelay() {
+    public DelayMetrics getDelay() {
         return delay;
     }
 }

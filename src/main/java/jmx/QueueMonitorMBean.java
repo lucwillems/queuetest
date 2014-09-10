@@ -12,4 +12,5 @@ public interface QueueMonitorMBean {
     public int getMinDelay();
     public int getMeanDelay();
     public int getMaxDelay();
+    public int getAvgDelay();
 }

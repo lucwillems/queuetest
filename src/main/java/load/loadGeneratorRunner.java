@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit;
  * Created by luc on 9/3/14.
  */
 public class loadGeneratorRunner implements Runnable {
-    private Logger logger = LoggerFactory.getLogger(loadGeneratorRunner.class);
-    RateLimiter limiter;
+    private final Logger logger = LoggerFactory.getLogger(loadGeneratorRunner.class);
+    private final RateLimiter limiter;
     private int id;
-    double prevRate;
-    private Random random=new Random();
-    private Queue<net.Packet> queue;
-    private LoadGeneratorMBean input;
+    private double prevRate;
+    private final Random random=new Random();
+    private final Queue<net.Packet> queue;
+    private final LoadGeneratorMBean input;
 
 
     public loadGeneratorRunner(Queue<net.Packet> queue, LoadGeneratorMBean input) {
@@ -26,10 +26,6 @@ public class loadGeneratorRunner implements Runnable {
         this.queue = queue;
         this.input = input;
         this.prevRate = input.getRate();
-    }
-
-    public void setRate(Double rate) {
-        this.limiter.setRate(rate);
     }
 
     @Override
@@ -49,7 +45,7 @@ public class loadGeneratorRunner implements Runnable {
                 if (input.getRandom()>0){
                     size=size+random.nextInt(input.getRandom());
                 }
-                limiter.acquire(input.getPacketSize()+random.nextInt(input.getPacketSize()/10));
+                limiter.acquire(size);
                 if (input.getRate() != prevRate) {
                     logger.info("update rate to {}", input.getRate());
                     limiter.setRate(input.getRate());

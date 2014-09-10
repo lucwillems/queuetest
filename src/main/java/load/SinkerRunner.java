@@ -12,10 +12,10 @@ import java.util.concurrent.TimeUnit;
  * Created by luc on 9/4/14.
  */
 public class SinkerRunner implements Runnable {
-    private Logger log= LoggerFactory.getLogger(SinkerRunner.class);
-    private Queue<Packet> queue;
-    private SinkerMBean input;
-    private RateLimiter limiter;
+    private final Logger log= LoggerFactory.getLogger(SinkerRunner.class);
+    private final Queue<Packet> queue;
+    private final SinkerMBean input;
+    private final RateLimiter limiter;
     private double prevRate;
     public SinkerRunner(Queue<Packet> queue,SinkerMBean input) {
         this.queue=queue;
@@ -35,7 +35,6 @@ public class SinkerRunner implements Runnable {
                 Packet p = queue.deQueue();
                 if (p != null) {
                     log.debug("got  id: {} prio:{} size:{}", p.id, p.prio, p.size);
-                    input.addDelay(System.currentTimeMillis()-p.timeStamp);
                     limiter.acquire(p.size);
                 } else {
                     log.info("got NULL, waiting for input...");

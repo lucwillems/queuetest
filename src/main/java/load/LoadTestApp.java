@@ -1,6 +1,5 @@
 package load;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import jmx.BucketQueueMonitor;
 import jmx.QuantumMonitor;
 import jmx.QueueMonitor;
@@ -17,27 +16,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * Created by luc on 9/3/14.
  */
 public class LoadTestApp {
-    Logger log= LoggerFactory.getLogger(LoadTestApp.class);
-    ScheduledExecutorService executor;
-    MBeanServer mbs;
-    LoadGenerator staticLoad0;
-    LoadGenerator staticLoad1;
-    LoadGenerator staticLoad2;
-    LoadGenerator staticLoad3;
-    LoadGenerator staticLoad4;
-    LoadGenerator staticLoad5;
-    Sinker sinker;
-    PrioBucketQueue queue;
-    QueueMonitor mainQueueIn;
-    QueueMonitor mainQueueOut;
-    BucketQueueMonitor bucket0;
-    BucketQueueMonitor bucket1;
-    BucketQueueMonitor bucket2;
-    BucketQueueMonitor bucket3;
-    BucketQueueMonitor bucket4;
-    BucketQueueMonitor bucket5;
-    QuantumMonitor quantumMonitor;
-    LoadModulator modulator;
+    private final Logger log= LoggerFactory.getLogger(LoadTestApp.class);
+    private MBeanServer mbs;
+    private QuantumMonitor quantumMonitor;
 
     private void regiserMbean(Object mbean,String name) {
         try {
@@ -50,12 +31,11 @@ public class LoadTestApp {
 
     public void init() {
         mbs= ManagementFactory.getPlatformMBeanServer();
-        queue=new PrioBucketQueue(6,5);
-        quantumMonitor=new QuantumMonitor(queue);
+        PrioBucketQueue queue = new PrioBucketQueue(6, 5);
+        quantumMonitor=new QuantumMonitor();
         queue.init(new BucketEvents() {
                        @Override
                        public void onInit(BucketQueue bucket) {
-                           simplePacketQueue queue = new simplePacketQueue();
                            bucket.setQueue(new simplePacketQueue());
                        }
 
@@ -74,30 +54,30 @@ public class LoadTestApp {
         int[] procents={5,10,50,25,10,10};//sum must be 100%
         int mtu=1500;
         queue.setup(procents, mtu);
-        executor=new ScheduledThreadPoolExecutor(20);
-        staticLoad0=new LoadGenerator(executor,queue,0);
-        staticLoad1=new LoadGenerator(executor,queue,1);
-        staticLoad2=new LoadGenerator(executor,queue,2);
-        staticLoad3=new LoadGenerator(executor,queue,3);
-        staticLoad4=new LoadGenerator(executor,queue,4);
-        staticLoad5=new LoadGenerator(executor,queue,5);
+        ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(20);
+        LoadGenerator staticLoad0 = new LoadGenerator(executor, queue, 0);
+        LoadGenerator staticLoad1 = new LoadGenerator(executor, queue, 1);
+        LoadGenerator staticLoad2 = new LoadGenerator(executor, queue, 2);
+        LoadGenerator staticLoad3 = new LoadGenerator(executor, queue, 3);
+        LoadGenerator staticLoad4 = new LoadGenerator(executor, queue, 4);
+        LoadGenerator staticLoad5 = new LoadGenerator(executor, queue, 5);
         staticLoad0.setRate(1000);
         staticLoad1.setRate(1000);
         staticLoad2.setRate(50000);
         staticLoad3.setRate(50000);
         staticLoad4.setRate(3000);
         staticLoad5.setRate(40000);
-        bucket0=new BucketQueueMonitor(queue.getBucket(0),true);
-        bucket1=new BucketQueueMonitor(queue.getBucket(1),true);
-        bucket2=new BucketQueueMonitor(queue.getBucket(2),true);
-        bucket3=new BucketQueueMonitor(queue.getBucket(3),true);
-        bucket4=new BucketQueueMonitor(queue.getBucket(4),true);
-        bucket5=new BucketQueueMonitor(queue.getBucket(5),true);
-        sinker=new Sinker(executor,queue);
+        BucketQueueMonitor bucket0 = new BucketQueueMonitor(queue.getBucket(0), true);
+        BucketQueueMonitor bucket1 = new BucketQueueMonitor(queue.getBucket(1), true);
+        BucketQueueMonitor bucket2 = new BucketQueueMonitor(queue.getBucket(2), true);
+        BucketQueueMonitor bucket3 = new BucketQueueMonitor(queue.getBucket(3), true);
+        BucketQueueMonitor bucket4 = new BucketQueueMonitor(queue.getBucket(4), true);
+        BucketQueueMonitor bucket5 = new BucketQueueMonitor(queue.getBucket(5), true);
+        Sinker sinker = new Sinker(executor, queue);
         sinker.setRate(100000);
-        mainQueueIn=new QueueMonitor(queue,false);
-        mainQueueOut=new QueueMonitor(queue,true);
-        modulator=new LoadModulator(executor,sinker);
+        QueueMonitor mainQueueIn = new QueueMonitor(queue, false);
+        QueueMonitor mainQueueOut = new QueueMonitor(queue, true);
+        LoadModulator modulator = new LoadModulator(executor, sinker);
         modulator.setMaximum(150000);
         modulator.setMinimum(50000);
         regiserMbean(mainQueueIn,"org.it4y.queue:type=input");
@@ -132,6 +112,7 @@ public class LoadTestApp {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return;
             }
         }
 
